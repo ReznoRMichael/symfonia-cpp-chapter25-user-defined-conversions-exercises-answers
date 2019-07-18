@@ -1,0 +1,87 @@
+— konwersje (przekształcenia) jednego obiektu na drugi mogą w przyszłości zaoszczędzić sporo pracy i ułatwić programowanie.
+
+I. Między typem TbaseClass a typem ZconvertTo konwersja może być przeprowadzona za pomocą dwóch narzędzi:
+— konstruktor konwertujący przyjmujący jako argument obiekt drugiego typu np. TbaseClass::TbaseClass( ZconvertTo objectZ ) oraz bez przydomka explicit
+— składowa funkcja konwertująca (operator konwersji) np. TbaseClass::operator ZconvertTo()
+
+II. Przydomek explicit stojący przed konstruktorem konwertującym zapobiega konwersjom niejawnym w programie (kompilator będzie sygnalizował błąd za każdym razem jeśli zdarzy się taka sytuacja).
+Jest to jakby powiedzenie: "Kompilatorze! Ten konstruktor nie robi sensownej konwersji"
+
+III. Konstruktor mający 4 argumenty może być konstruktorem konwertującym, pod warunkiem, że można go będzie wywołać tylko z jednym argumentem ( typ z którego będzie przeprowadzana konwersja ) - reszta argumentów musi być domniemana.
+
+IV. W klasie ZbaseClass jest konstruktor domniemany i konstruktor ZbaseClass::ZbaseClass( double ). W programie jest też funkcja void function( ZbaseClass );
+Która z poniższych instrukcji spowoduje niejawne wywołanie konstruktora konwertującego klasy ZbaseClass: (program)
+(go back after gaining more knowledge)
+
+V. Realizacja konwersji z klasy do typu wbudowanego, co lepiej wybrać?
+— konstruktor konwertujący czy
+— operator konwersji (funkcja)
+
+Aby zapewnić konwersję obiektu klasy A na typ wbudowany, trzeba posłużyć się operatorem konwersji (funkcją składową). Innej drogi nie ma.
+
+VI. W co należy wyposażyć klasę K, aby była możliwa następująca instrukcja if?
+K obj;
+if (obj) cout << "Jest" << endl;
+
+Przy wyrażeniach jak np. if( obj ) konwersja musi zachodzić niejawnie, dlatego w każdym przypadku kompilator będzie chciał określić wartość (int) obj;
+Potrzebne jest zastosowanie operatora konwersji (funkcji): K::operator int();
+
+VII. Czy można przeładować funkcję konwertującą?
+Funkcja konwertująca ma pustą listę argumentów. A to oznacza, że wykluczona jest możliwość przeładowania jej.
+
+VIII. W klasie K nie można wykorzystać operatora konwersji (funkcji) w przypadku konwersji na:
+c) int[5] typ reprezentujący tablicę
+e) void
+f) K - ten sam typ
+g) K& - przezwisko (referencja) dla typu
+i) int m(K) - typ jakiejś funkcji 
+
+IX. Która metoda konwersji ma więcej wad? Konstruktor konwertujący.
+— nie można zdefiniować konstruktora dla typu wbudowanego
+— nie można napisać konstruktora dla np. czegoś z biblioteki (czyli czegoś, co nie jest naszą własnością)
+— konstruktor musi mieć dostęp do składników klasy, do której będzie przeprowadzana konwersja (trzeba zmodyfikować klasę)
+— argumenty muszą pasować, nie można polegać na żadnych konwersjach standardowych
+
+X. Kiedy może nastąpić niejawna konwersja przy wywoływaniu funkcji:
+— gdy argument wywołania nie zgadza się z argumentem formalnym (niezgodność argumentów)
+— gdy w wywołaniu funkcji zamieścimy jakieś wyrażenie
+
+XI. Kiedy może nastąpić niejawna konwersja przy zwracaniu rezultatu funkcji:
+— gdy przy zwracaniu rezultatu funkcji obiekt stojący obok return jest innego typu niż deklarowany
+
+XII. Dwa wyrażenia reprezentujące dwie formy jawnego wykonania konwersji sposobami tradycyjnymi między jednym obiektem a drugim.
+
+Tobiekt obiektA;
+TinnyObiekt obiektB;
+
+Forma funkcji:
+obiektB = TinnyObiekt( obiektA );
+
+Forma rzutowania:
+obiektB = (TinnyObiekt) obiektA;
+
+Forma static_cast:
+obiektB = static_cast< TinnyObiekt >( obiektA );
+
+XIII. Gdy chcemy do konstrukcji obiektu chwilowego użyć więcej niż jednego argumentu, to musimy użyć metody przypominającej wywołanie funkcji (wywołujemy konstruktora bezpośrednio z kilkoma argumentami).
+
+XIV. Jeśli chcemy obiekt konwertować jawnie do jakiegoś typu złożonego np. wskaźnik do jakiegoś typu (M*) to musimy się posłużyć metodą przypominającą rzutowanie lub static_cast.
+Niemożliwa jest wtedy metoda przypominająca wywołanie funkcji.
+b) M*(objK)
+
+XV. Jeśli klasa ma zdefiniowany operator konwersji na typ long, a wywołamy funkcję void f(double) z argumentem obiektu tej klasy, to jest to możliwe. Zajdą dwie konwersje.
+
+XVI. W klasie K jest operator konwersji na typ M. W klasie E jest operator konwersji na typ K.
+Czy można wywołać funkcję void f(M) dla obiektu klasy E?
+Nie można, gdyż konwersja zdefiniowana przez użytkownika zostanie wykonana dwukrotnie. (dopuszczalna jest tylko jednokrotna konwersja niejawna, jawne konwersje nie mają ograniczeń)
+E -> K -> M 
+
+XVII. Jest to sytuacja wieloznaczności. Obie konwersje zamieniają typ obiektu na typ pasujący dokładnie do jednej z funkcji. Kompilator nie będzie wiedział, którą wybrać, zasygnalizuje komunikat o błędzie.
+Konwersje zdefiniowane przez użytkownika są stosowane przez kompilator tylko wtedy, gdy nie ma sytuacji wieloznaczności.
+
+XVIII. Jeśli w programie są dwie, jednakowo dobre możliwości zamiany obiektu klasy K na jakiś typ M, to kompilator nie zasygnalizuje błędu. Błąd pojawi się dopiero wtedy, kiedy gdzieś potrzebna będzie niejawna konwersja. Wtedy okaże się, że jest to dwuznaczność.
+Błąd pojawi się też w przypadku jawnej konwersji, gdyż oba sposoby jawnej konwersji nie precyzują która konkretnie drogą ma zostać przeprowadzona konwersja.
+
+XIX. Staraj się, by klasa miała co najwyżej jeden operator konwersji.
+Schemat typu dorzecze: Tutaj obiekty różnych klas może być zamienianych na jeden innej klasy, która jest zapewne tym, co pozostałe klasy mają ze sobą wspólnego. Nie ma żadnego ryzyka zajścia wieloznaczności, gdyż obiekt może zostać zamieniony na inny tylko w jeden sposób.
+Schemat typu eksplozja: Tutaj mnoży się konwersje ponad potrzebę. Czyli zachodzi wieloznaczność. Z jednego prostego obiektu tworzy się obiekt złożony, a powinno być na odwrót. Aby temu zaradzić, można stworzyć zwykłą funkcję składową, używaną zamiast operatora konwersji.
